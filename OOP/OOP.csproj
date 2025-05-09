@@ -54,8 +54,8 @@
     <Compile Include="classes\Managers\IngredientManager.cs" />
     <Compile Include="classes\Managers\OrderManager.cs" />
     <Compile Include="classes\Managers\PizzaBaseManager.cs" />
-    <Compile Include="classes\Pizza\CombinedPizza.cs" />
-    <Compile Include="classes\Pizza\Pizza.cs" />
+    <Compile Include="classes\PizzaTypes\CombinedPizza.cs" />
+    <Compile Include="classes\PizzaTypes\Pizza.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

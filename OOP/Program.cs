@@ -6,92 +6,15 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Security.Cryptography;
 using System.Diagnostics.CodeAnalysis;
-using OOP.classes.Managers;
 using OOP.classes;
-using OOP.classes.Pizza;
+using OOP.classes.Managers;
+using OOP.classes.PizzaTypes;
 using OOP.classes.OrderManagementSystem;
+using OOP.classes.PizzaComponents;
 
 namespace OOP
 {
-   
-
-    public class OrderManager
-    {
-        public OrderManager(List<Ingredient> ingredients, List<Ingredient> borders, List<PizzaBase> bases) { }
-
-
-        /*public void buildPizza()
-        {
-            Console.WriteLine("Number of pizza parts: ");
-            this.countOfPieces = Convert.ToInt32(Console.ReadLine());
-
-            for (int c = 0; c < countOfPieces; ++c)
-            {
-                Console.WriteLine($"Lets buils {c + 1} pizza part");
-
-                int baseNumber = -1;
-                while (baseNumber < 0 || baseNumber > this.bases.Count)
-                {
-                    for (int i = 0; i < this.bases.Count; ++i)
-                    {
-                        Console.WriteLine($"{i + 1}. {this.bases[i].price}$ {this.bases[i].name}");
-                    }
-
-                    Console.WriteLine("Choose the base:");
-                    baseNumber = Convert.ToInt32(Console.ReadLine()) - 1;
-                    baseNumber = ((baseNumber > 0) && (baseNumber < this.bases.Count)) ? baseNumber : 0;
-                }
-
-                int borderNumber = -1;
-                while (borderNumber < 0 || borderNumber > this.borders.Count)
-                {
-                    for (int i = 0; i < this.borders.Count; ++i)
-                    {
-                        Console.WriteLine($"{i + 1}. {this.borders[i].price}$ {this.borders[i].name}");
-                    }
-
-                    Console.WriteLine("Choose the borders:");
-                    borderNumber = Convert.ToInt32(Console.ReadLine()) - 1;
-                }
-
-
-                for (int i = 0; i < this.ingredients.Count; ++i)
-                {
-                    Console.WriteLine($"{i + 1}. {this.ingredients[i].price}$ {this.ingredients[i].name}");
-                }
-
-                Console.WriteLine("Enter ingredient numbers separated by spaces: ");
-                string input = Console.ReadLine();
-                string[] numbers = input.Split(' ');
-                List<int> indexes = new List<int>();
-
-                List<Ingredient> ings = new List<Ingredient>();
-                foreach (string i in numbers)
-                {
-                    int n = Convert.ToInt32(i) - 1;
-                    if ((n > 0) && (n < this.ingredients.Count))
-                    {
-                        ings.Add(this.ingredients[n]);
-                    }
-                }
-                Console.WriteLine("Your pizza:");
-                Pizza newPizza = new Pizza("user pizza", this.bases[baseNumber], this.borders[borderNumber], ings);
-                newPizza.print();
-
-                string ans;
-                Console.WriteLine("Order? (y/n)");
-                ans = Console.ReadLine();
-                if (ans == "y") ;
-                Console.WriteLine("Add this pizza to the catalog? (y/n)");
-                ans = Console.ReadLine();
-                if (ans == "y") this.userCustomRecipes.Add(newPizza);
-            }
-        }
-*/
-    }
-
     public class PizzaBase : Ingredient
     {
         private int base_price = 100;
@@ -115,16 +38,17 @@ namespace OOP
         {
             setDefaultIngridient();
             setDefaultBases();
-            setDefaultSides();
+            setDefaultBorders();
             setDefaultCatalog();
+
+            this.userCustomRecipes = new List<Pizza>();
+            this.orderHistory = new List<Order>();
 
             this.ingredientManager = new IngredientManager(this.ingredients);
             this.borderManager = new PizzaBorderManager(this.borders);
             this.baseManager = new PizzaBaseManager(this.bases);
-            //this.orderManager = new OrderManager();
-
-            this.userCustomRecipes = new List<Pizza>();
-            this.orderHistory = new List<Order>();
+            this.orderManager = new OrderManager(this.ingredients, this.borders,
+                this.bases, this.orderHistory, this.pizzas, this.userCustomRecipes);
         }
 
         IngredientManager ingredientManager;
@@ -133,7 +57,7 @@ namespace OOP
         OrderManager orderManager;
 
         public List<Ingredient> ingredients;
-        public List<Ingredient> borders;
+        public List<Border> borders;
         public List<PizzaBase> bases;
         public List<Pizza> pizzas;
 
@@ -167,14 +91,14 @@ namespace OOP
             };
         }
 
-        public void setDefaultSides()
+        public void setDefaultBorders()
         {
-            this.borders = new List<Ingredient>
+            this.borders = new List<Border>
             {
-                new Ingredient("default",     100),
-                new Ingredient("not default", 115),
-                new Ingredient("spicy sauce", 110),
-                new Ingredient("idk",         105)
+                new Border("default",     100),
+                new Border("not default", 115),
+                new Border("spicy sauce", 110),
+                new Border("idk",         105)
             };
         }
 
@@ -331,9 +255,9 @@ namespace OOP
                     "========== Select action ================\n" +
                     "1. Editing Ingredients\n" +
                     "2. Editing pizza bases\n" +
-                    "3. Pizza constructor\n" +
+                    "3. Make an order\n" +
                     "4. Pizza catalog\n" +
-                    "5. Check available components\n" +
+                    "5. Check ingredients & menu\n" +
                     "6. Check order history\n" +
                     "7. End the program\n" +
                     "============================================\n" +
@@ -352,7 +276,8 @@ namespace OOP
                         break;
                     case 3:
                         this.clear();
-                        this.buildPizza();
+                        this.orderManager.makeAnOrder();
+                        //this.buildPizza();
                         break;
                     case 4:
                         this.clear();
@@ -369,8 +294,7 @@ namespace OOP
                         break;
                 }
             }
-        }
-         
+        } 
 
         public void clear()
         {
@@ -408,7 +332,7 @@ namespace OOP
  * одной вне зависимости от типа пиццы, бортики могут быть как отдельные, так и общие.
  * У заказа есть номер, содержащиеся в нём пиццы, общая стоимость, комментарий и время заказа. Заказ можно так же
  * сделать отложенным, указав дату и время.
- * Возможность вывода всех заказов, сделанных в системе. 
+ * + Возможность вывода всех заказов, сделанных в системе. 
  * Для вывода любого списка необходимо написать фильтрацию. Например, вывод всех пицц, содержащих помидоры,
  * или вывод всех заказов, сделанных 03.05.2025.
  */

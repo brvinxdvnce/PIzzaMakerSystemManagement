@@ -1,4 +1,4 @@
-﻿using OOP.classes.Pizza;
+﻿using OOP.classes.PizzaTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +14,10 @@ namespace OOP.classes.OrderManagementSystem
             this.pizzas = new List<CombinedPizza>();
         }
 
+        public int pizzasCount;
         public List<CombinedPizza> pizzas;
         public int totalPrice;
         public string date;
+        public string comment;
     }
 }

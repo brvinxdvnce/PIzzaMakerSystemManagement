@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OOP.classes.Pizza
+namespace OOP.classes.PizzaTypes
 {
     public class Pizza
     {
@@ -56,6 +56,14 @@ namespace OOP.classes.Pizza
             }
             Console.WriteLine($"Pizza price: {this.totalPrice}$\n");
 
+        }
+
+        public void doubleBoost()
+        {
+            for (int i = 0; i < this.ingredients.Count; ++i)
+            {
+                this.ingredients.Add(this.ingredients[i]);
+            }
         }
     }
 
